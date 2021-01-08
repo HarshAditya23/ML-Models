@@ -4,7 +4,7 @@ Created on Thu Jan  7 12:26:39 2021
 
 @author: Dell
 """
-
+import base64
 import yfinance as yf
 import streamlit as st
 
@@ -13,7 +13,7 @@ st.markdown("Experience the new way of Browsing Stocks")
 
 st.sidebar.title("Stock Price App")
 
-text = st.sidebar.text_input('Enter the name of company -')
+text = st.sidebar.text_input('Enter the code of company -')
 tickerSymbol = text
 tickerData = yf.Ticker(tickerSymbol)
 
@@ -45,21 +45,19 @@ if st.sidebar.checkbox("Volume", False):
     
 st.sidebar.title("Explore Raw Stock Data")     
 
-option = st.sidebar.selectbox('View and Download Data in Excel',('','Yes', 'No'))
+option = st.sidebar.selectbox('View and Download Data in Excel',('<Select>','Yes', 'No'))
 if option == "Yes":
     st.write("""## Stock data""")
     st.write(tickerDf)
     
-    def download(tickerDf):
-        tickerDf = yf.download(text, start=start_date, end=end_date)
-        data = tickerDf.to_csv('data.csv')
-        return data
-    
+    def download():
+        csv = tickerDf.to_csv(index=False)
+        b64 = base64.b64encode(csv.encode()).decode()
+        href = f'<a href="data:file/csv;base64,{b64}" download="file.csv">Download Excel File</a>'
+        st.markdown(href, unsafe_allow_html=True) 
+      
     if st.button('Download'):
-        result = download(tickerDf)
-        st.write('Download Successful')
-    else:
-        st.write("Download Failed")
+        result = download()
 
 elif option == "No":
     pass
